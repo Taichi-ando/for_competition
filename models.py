@@ -119,7 +119,7 @@ def fit_catboost(X, y, params, folds, categorycal_list=[], add_suffix=""):
             eval_set=[cat_valid],
             verbose=100,
         )
-        pickle.dump(model, open(f"{OUTPUT_DIR}/lgbm_fold{fold}{add_suffix}.pkl", "wb"))
+        pickle.dump(model, open(f"{OUTPUT_DIR}/cat_fold{fold}{add_suffix}.pkl", "wb"))
         # pred_i = model.predict(x_valid)
         pred_i = model.predict_proba(x_valid)[:, 1]  #
         oof_pred[x_valid.index] = pred_i
@@ -134,7 +134,7 @@ def fit_catboost(X, y, params, folds, categorycal_list=[], add_suffix=""):
 
 
 def pred_catboost(X, add_suffix=""):
-    models = glob(f"{OUTPUT_DIR}/lgbm*{add_suffix}.pkl")
+    models = glob(f"{OUTPUT_DIR}/cat*{add_suffix}.pkl")
     models = [pickle.load(open(model, "rb")) for model in models]
     preds = np.array([model.predict_proba(X)[:, 1] for model in models])
     preds = np.mean(preds, axis=0)
@@ -177,7 +177,7 @@ def fit_xgboost(X, y, params, folds, add_suffix=""):
             evals=evals,
             verbose_eval=100,
         )
-        pickle.dump(model, open(f"{OUTPUT_DIR}/lgbm_fold{fold}{add_suffix}.pkl", "wb"))
+        pickle.dump(model, open(f"{OUTPUT_DIR}/xgb_fold{fold}{add_suffix}.pkl", "wb"))
         pred_i = model.predict(xgb.DMatrix(x_valid), ntree_limit=model.best_ntree_limit)
         oof_pred[x_valid.index] = pred_i
         score = round(roc_auc_score(y_valid, pred_i), 5)
@@ -191,7 +191,7 @@ def fit_xgboost(X, y, params, folds, add_suffix=""):
 
 
 def pred_xgboost(X, add_suffix=""):
-    models = glob(f"{OUTPUT_DIR}/lgbm*{add_suffix}.pkl")
+    models = glob(f"{OUTPUT_DIR}/xgb*{add_suffix}.pkl")
     models = [pickle.load(open(model, "rb")) for model in models]
     preds = np.array(
         [
